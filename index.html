@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBA Cocktail Timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a18; --ink-mid: #5a5a54; --ink-light: #a0a098;
+    --ink-faint: #e8e8e2; --paper: #fafaf7;
+    --col-unforgettable: #7F77DD; --col-contemporary: #1D9E75;
+    --col-newera: #D85A30; --col-pre: #C8C8C0;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-weight: 300; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  header { border-bottom: 1px solid var(--ink-faint); padding: 2.5rem 0 0; }
+  .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+  .eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 1rem; }
+
+  h1 { font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.25rem; max-width: 700px; }
+
+  /* View switcher in title */
+  .view-switcher { position: relative; display: inline-block; }
+  .view-trigger {
+    font-family: var(--serif); font-style: italic; color: var(--ink-mid);
+    cursor: pointer; border-bottom: 1px dashed var(--ink-light);
+    padding-bottom: 1px; transition: color 0.15s;
+    display: inline-flex; align-items: baseline; gap: 4px;
+  }
+  .view-trigger:hover { color: var(--ink); border-bottom-color: var(--ink); }
+  .view-trigger .arrow {
+    font-size: 0.55em; font-style: normal; transition: transform 0.2s;
+    display: inline-block; margin-left: 2px;
+  }
+  .view-trigger.open .arrow { transform: rotate(180deg); }
+  .view-dropdown {
+    display: none; position: absolute; top: calc(100% + 8px); left: 0;
+    background: white; border: 1px solid var(--ink-faint);
+    border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    min-width: 180px; z-index: 100; overflow: hidden;
+  }
+  .view-dropdown.open { display: block; }
+  .view-option {
+    display: block; width: 100%; padding: 10px 16px;
+    font-family: var(--sans); font-size: 13px; font-weight: 300;
+    color: var(--ink-mid); background: none; border: none;
+    cursor: pointer; text-align: left; transition: background 0.1s;
+  }
+  .view-option:hover { background: var(--ink-faint); color: var(--ink); }
+  .view-option.active { color: var(--ink); font-weight: 500; }
+
+  .intro-text { font-size: 1rem; color: var(--ink-mid); max-width: 560px; line-height: 1.75; margin-bottom: 2.5rem; font-weight: 300; }
+  .stats-bar { display: flex; border-top: 1px solid var(--ink-faint); }
+  .stat { padding: 1.25rem 2rem 1.25rem 0; margin-right: 2rem; border-right: 1px solid var(--ink-faint); }
+  .stat:last-child { border-right: none; }
+  .stat-number { font-family: var(--serif); font-size: 1.9rem; font-weight: 600; line-height: 1; margin-bottom: 0.2rem; }
+  .stat-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-light); }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
+
+  .controls { display: flex; gap: 0; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--ink-faint); }
+  .ctrl-sep { width: 1px; height: 20px; background: var(--ink-faint); margin: 0 2px; flex-shrink: 0; }
+  .ctrl-dropdown { position: relative; }
+  .ctrl-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; font-family: var(--sans); font-size: 12px; font-weight: 400; color: var(--ink-mid); background: none; border: none; cursor: pointer; transition: color 0.15s; white-space: nowrap; letter-spacing: 0.01em; }
+  .ctrl-btn:hover { color: var(--ink); }
+  .ctrl-btn.active { color: var(--ink); font-weight: 500; }
+  .ctrl-btn .ctrl-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .ctrl-btn .ctrl-arrow { font-size: 9px; color: var(--ink-light); margin-left: 1px; transition: transform 0.2s; }
+  .ctrl-btn.open .ctrl-arrow { transform: rotate(180deg); }
+  .ctrl-menu { display: none; position: absolute; top: calc(100% + 4px); left: 0; min-width: 190px; background: white; border: 1px solid var(--ink-faint); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); z-index: 200; overflow: hidden; }
+  .ctrl-menu.open { display: block; }
+  .ctrl-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 14px; font-family: var(--sans); font-size: 12px; font-weight: 300; color: var(--ink-mid); background: none; border: none; cursor: pointer; text-align: left; transition: background 0.1s; }
+  .ctrl-item:hover { background: var(--ink-faint); color: var(--ink); }
+  .ctrl-item.active { color: var(--ink); font-weight: 500; }
+  .ctrl-item .ctrl-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .ctrl-divider { height: 1px; background: var(--ink-faint); margin: 4px 0; }
+  .search-wrap { position: relative; flex: 0 0 220px; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--ink-light); pointer-events: none; }
+  input[type="text"] { width: 100%; padding: 8px 12px 8px 32px; border: 1px solid var(--ink-faint); border-radius: 4px; background: white; font-family: var(--sans); font-size: 13px; font-weight: 300; color: var(--ink); outline: none; transition: border-color 0.15s; }
+  input[type="text"]:focus { border-color: var(--ink-mid); }
+  input[type="text"]::placeholder { color: var(--ink-light); }
+
+
+
+
+  .legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 400; color: var(--ink-mid); }
+  .legend-swatch { width: 18px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  #chart-container { width: 100%; overflow-x: auto; }
+  #chart-svg { display: block; }
+
+  /* Distribution view */
+  
+  
+  
+  
+  
+  
+  
+  
+
+  /* Drilldown panel */
+  
+  
+  
+  
+  
+  
+  
+
+  #tooltip { position: fixed; background: white; border: 1px solid var(--ink-faint); border-radius: 8px; padding: 10px 14px; font-family: var(--sans); font-size: 12px; font-weight: 300; pointer-events: none; display: none; z-index: 999; box-shadow: 0 4px 24px rgba(0,0,0,0.08); max-width: 200px; line-height: 1.6; overflow: hidden; padding: 0; border-radius: 8px; }
+  .result-count { font-size: 11px; color: var(--ink-light); font-weight: 400; letter-spacing: 0.04em; margin-bottom: 0.75rem; }
+  footer { border-top: 1px solid var(--ink-faint); padding: 2rem; text-align: center; font-size: 11px; color: var(--ink-light); letter-spacing: 0.06em; }
+
+  /* ── DISTRIBUTION ── */
+    .section-sub { font-size: 11px; color: var(--ink-light); letter-spacing: 0.04em; margin-bottom: 1.5rem; }
+  
+    /* Horizontal bar */
+    .hbar-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 6px; cursor: pointer;
+      padding: 3px 0; border-radius: 4px;
+      transition: background 0.1s;
+    }
+    .hbar-row:hover { background: rgba(0,0,0,0.02); }
+    .hbar-row.active .hbar-label { color: var(--ink); font-weight: 500; }
+    .hbar-label { width: 120px; min-width: 120px; font-size: 12px; color: var(--ink-mid); text-align: right; font-weight: 300; transition: all 0.15s; white-space: nowrap; }
+    .hbar-track { flex: 1; height: 24px; background: var(--ink-faint); border-radius: 3px; overflow: hidden; }
+    .hbar-fill { height: 100%; border-radius: 3px; display: flex; align-items: center; padding-left: 9px; transition: width 0.3s ease, opacity 0.2s; }
+    .hbar-val { font-size: 11px; font-weight: 500; color: white; }
+    .hbar-pct { width: 38px; font-size: 11px; color: var(--ink-light); text-align: right; flex-shrink: 0; }
+  
+    /* Pie panel */
+    .pie-panel {
+      display: none; margin: 1.5rem 0 2rem 132px;
+      padding: 1.25rem 1.5rem; background: white;
+      border: 1px solid var(--ink-faint); border-radius: 8px;
+      animation: fadeIn 0.2s ease;
+    }
+
+  /* ── DISTRIBUTION CHARTS ── */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--ink-faint); }
+  .tab { padding: 8px 22px; font-family: var(--sans); font-size: 12px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+  .tab:hover { color: var(--ink-mid); }
+  .tab.active { color: var(--ink); border-bottom-color: var(--ink); font-weight: 500; }
+  .section-sub { font-size: 11px; color: var(--ink-light); letter-spacing: 0.04em; margin-bottom: 1.5rem; }
+  .hbar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; cursor: pointer; padding: 3px 0; border-radius: 4px; transition: background 0.1s; }
+  .hbar-row:hover { background: rgba(0,0,0,0.02); }
+  .hbar-row.active .hbar-label { color: var(--ink); font-weight: 500; }
+  .hbar-label { width: 120px; min-width: 120px; font-size: 12px; color: var(--ink-mid); text-align: right; font-weight: 300; transition: all 0.15s; white-space: nowrap; }
+  .hbar-track { flex: 1; height: 24px; background: var(--ink-faint); border-radius: 3px; overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: 3px; display: flex; align-items: center; padding-left: 9px; transition: width 0.3s ease, opacity 0.2s; }
+  .hbar-val { font-size: 11px; font-weight: 500; color: white; }
+  .hbar-pct { width: 38px; font-size: 11px; color: var(--ink-light); text-align: right; flex-shrink: 0; }
+  .pie-panel { display: none; margin: 1.5rem 0 2rem 132px; padding: 1.25rem 1.5rem; background: white; border: 1px solid var(--ink-faint); border-radius: 8px; animation: fadeIn 0.2s ease; }
+  .pie-panel.open { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .pie-title { font-family: var(--serif); font-size: 1rem; font-weight: 400; margin-bottom: 0.25rem; }
+  .pie-subtitle { font-size: 11px; color: var(--ink-light); margin-bottom: 1rem; }
+  .pie-wrap { flex-shrink: 0; }
+  svg.pie { display: block; }
+  .pie-legend { display: flex; flex-direction: column; gap: 7px; justify-content: center; }
+  .pie-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-mid); }
+  .pie-legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .pie-legend-pct { font-weight: 500; color: var(--ink); margin-left: auto; padding-left: 12px; font-size: 11px; }
+
+  /* ── BOARD VIEW ── */
+  #board-container { display: none; }
+  .board-group { margin-bottom: 2.5rem; }
+  .board-group-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--ink-faint); }
+  .board-group-title { font-family: var(--serif); font-size: 1.1rem; font-weight: 400; color: var(--ink); }
+  .board-group-count { font-size: 11px; color: var(--ink-light); letter-spacing: 0.06em; }
+  .board-cards { display: flex; flex-wrap: wrap; gap: 10px; }
+  .board-card {
+    width: 90px; background: white;
+    border: 1px solid var(--ink-faint); border-radius: 6px;
+    overflow: hidden; cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.15s;
+    text-decoration: none; display: block;
+  }
+  .board-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px); }
+  .board-card-thumb { width: 100%; height: 66px; display: flex; align-items: center; justify-content: center; }
+  .board-card-monogram { font-family: var(--serif); font-size: 28px; font-weight: 400; font-style: italic; opacity: 0.35; line-height: 1; }
+  .board-card-body { padding: 7px 8px 8px; }
+  .board-card-name { font-size: 11px; font-weight: 500; color: var(--ink); line-height: 1.3; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <p class="eyebrow">International Bartenders Association · 1961 – Present</p>
+    <h1>The Official Cocktail
+      <span class="view-switcher">
+        <span class="view-trigger" id="view-trigger">
+          <span id="view-label">Timeline</span>
+          <span class="arrow">▾</span>
+        </span>
+        <div class="view-dropdown" id="view-dropdown">
+          <button class="view-option active" data-view="timeline">Timeline</button>
+          <button class="view-option" data-view="distribution">Distribution</button>
+          <button class="view-option" data-view="board">Board</button>
+        </div>
+      </span>
+    </h1>
+    <p class="intro-text" id="intro-text">
+      A visual record of every cocktail listed across all seven editions of the IBA's official selection.
+      Track which drinks survived every revision, which were lost to time, and which arrived only recently.
+    </p>
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-number" id="stat-total">—</div><div class="stat-label">Total cocktails</div></div>
+      <div class="stat"><div class="stat-number" id="stat-active">—</div><div class="stat-label">Active in 2024</div></div>
+      <div class="stat"><div class="stat-number" id="stat-7ed">—</div><div class="stat-label">All 7 editions</div></div>
+      <div class="stat"><div class="stat-number" id="stat-onehit">—</div><div class="stat-label">One-hit wonders</div></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="controls" id="timeline-controls">
+    <div class="search-wrap" style="margin-right:8px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="search" placeholder="Search cocktail…">
+    </div>
+
+    <div class="ctrl-sep"></div>
+
+    <!-- Edition dropdown -->
+    <div class="ctrl-dropdown" id="dd-edition">
+      <button class="ctrl-btn active" id="btn-edition">
+        <span id="lbl-edition">Current Edition</span>
+        <span class="ctrl-arrow">▾</span>
+      </button>
+      <div class="ctrl-menu" id="menu-edition">
+        <button class="ctrl-item active" data-filter="active">Current Edition</button>
+        <button class="ctrl-item" data-filter="all">All Editions</button>
+      </div>
+    </div>
+
+    <div class="ctrl-sep"></div>
+
+    <!-- Category dropdown -->
+    <div class="ctrl-dropdown" id="dd-category">
+      <button class="ctrl-btn" id="btn-category">
+        <span id="lbl-category">All Categories</span>
+        <span class="ctrl-arrow">▾</span>
+      </button>
+      <div class="ctrl-menu" id="menu-category">
+        <button class="ctrl-item active" data-filter="all-cat">All Categories</button>
+        <div class="ctrl-divider"></div>
+        <button class="ctrl-item" data-filter="The Unforgettables"><span class="ctrl-dot" style="background:#7F77DD"></span>The Unforgettables</button>
+        <button class="ctrl-item" data-filter="Contemporary Classics"><span class="ctrl-dot" style="background:#1D9E75"></span>Contemporary Classics</button>
+        <button class="ctrl-item" data-filter="New Era"><span class="ctrl-dot" style="background:#D85A30"></span>New Era</button>
+      </div>
+    </div>
+
+    <div class="ctrl-sep"></div>
+
+    <!-- Story dropdown -->
+    <div class="ctrl-dropdown" id="dd-story">
+      <button class="ctrl-btn" id="btn-story">
+        <span id="lbl-story">Filter by Story</span>
+        <span class="ctrl-arrow">▾</span>
+      </button>
+      <div class="ctrl-menu" id="menu-story">
+        <button class="ctrl-item active" data-filter="all-story">No Filter</button>
+        <div class="ctrl-divider"></div>
+        <button class="ctrl-item" data-filter="One-hit Wonder"><span class="ctrl-dot" style="background:#C8C8C0"></span>One-hit Wonders</button>
+        <button class="ctrl-item" data-filter="comeback"><span class="ctrl-dot" style="background:#E8A020"></span>Comeback Kids</button>
+        <button class="ctrl-item" data-filter="rising"><span class="ctrl-dot" style="background:#20A0A0"></span>Rising Stars</button>
+        <button class="ctrl-item" data-filter="fallen"><span class="ctrl-dot" style="background:#C04040"></span>Fall from Grace</button>
+      </div>
+    </div>
+
+    <div class="ctrl-sep"></div>
+
+    <!-- Spirit dropdown -->
+    <div class="ctrl-dropdown" id="dd-spirit">
+      <button class="ctrl-btn" id="btn-spirit">
+        <span id="lbl-spirit">By Spirit</span>
+        <span class="ctrl-arrow">▾</span>
+      </button>
+      <div class="ctrl-menu" id="menu-spirit">
+        <button class="ctrl-item active" data-filter="all-spirit">All Spirits</button>
+        <div class="ctrl-divider"></div>
+        <button class="ctrl-item" data-filter="spirit-gin">Gin</button>
+        <button class="ctrl-item" data-filter="spirit-rum">Rum</button>
+        <button class="ctrl-item" data-filter="spirit-vodka">Vodka</button>
+        <button class="ctrl-item" data-filter="spirit-whiskey">Whiskey</button>
+        <button class="ctrl-item" data-filter="spirit-brandy">Brandy</button>
+        <button class="ctrl-item" data-filter="spirit-tequila">Tequila / Mezcal</button>
+        <button class="ctrl-item" data-filter="spirit-pisco">Pisco</button>
+        <button class="ctrl-item" data-filter="spirit-sparkling">Champagne & Sparkling</button>
+        <button class="ctrl-item" data-filter="spirit-other">Other Spirits</button>
+      </div>
+    </div>
+
+    <div class="ctrl-sep"></div>
+
+    <!-- A-Z toggle -->
+    <button class="ctrl-btn" id="btn-az" title="Sort A–Z">
+      <span id="lbl-az">A–Z</span>
+    </button>
+  </div>
+
+  <!-- Timeline view -->
+  <div id="timeline-view">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--col-pre)"></div>Pre-category</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--col-unforgettable)"></div>The Unforgettables</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--col-contemporary)"></div>Contemporary Classics</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--col-newera)"></div>New Era</div>
+    </div>
+    <div class="result-count" id="result-count"></div>
+    <div id="chart-container"><svg id="chart-svg"></svg></div>
+  </div>
+
+  <!-- Board view -->
+  <div id="board-container">
+    <div id="board-inner"></div>
+  </div>
+
+  <!-- Distribution view -->
+  <div id="dist-container" style="display:none">
+    <div class="tabs" id="dist-tabs" style="margin-bottom:2rem">
+      <button class="tab active" data-tab="spirit">Base Spirit</button>
+      <button class="tab" data-tab="glass">Glassware</button>
+    </div>
+    <p class="section-sub" id="section-sub">Ranked by count — click a row to see family breakdown</p>
+    <div id="hbar-chart"></div>
+    <div class="pie-panel" id="pie-panel">
+      <div>
+        <div class="pie-title" id="pie-title"></div>
+        <div class="pie-subtitle" id="pie-subtitle"></div>
+        <div class="pie-wrap"><svg class="pie" id="pie-svg" width="160" height="160" viewBox="0 0 160 160"></svg></div>
+      </div>
+      <div class="pie-legend" id="pie-legend"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Data sourced from the International Bartenders Association & Difford's Guide · All 7 editions 1961–2024
+</footer>
+<div id="tooltip"></div>
+
+<script>
+// ── SCRAPED DATA ──
+const SCRAPED = {
+  "adonis":{"family":"Aromatic","spirit":"sherry","glass":"Coupe","country":"USA","url":null},
+  "affinity":{"family":"Aromatic","spirit":"whisky","glass":"Coupe","country":"USA","url":null},
+  "alaska":{"family":"Aromatic","spirit":"gin","glass":"Nick & Nora","country":null,"url":null},
+  "americano":{"family":"Highball","spirit":"campari","glass":"Collins","country":"Italy","url":"https://iba-world.com/iba-cocktail/americano/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-americano-669490fe3cb42.webp"},
+  "angel_face":{"family":"Aromatic","spirit":"gin","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/angel-face/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-angel-face-669490fe6df67.webp"},
+  "apotheke":{"family":"Aromatic","spirit":"fernet","glass":"Old-fashioned","country":null,"url":"https://tuxedono2.com/apotheke-cocktail-recipe"},
+  "apple_martini":{"family":"Martini","spirit":"vodka","glass":"Martini","country":null,"url":null},
+  "aviation":{"family":"Sour","spirit":"gin","glass":"Coupe","country":"USA","url":"https://iba-world.com/iba-cocktail/aviation/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-aviation-66949102296a4.webp"},
+  "b_52":{"family":"Shooter","spirit":"coffee liqueur","glass":"Shot","country":"Canada","url":null},
+  "bacardi_cocktail":{"family":"Sour","spirit":"rum","glass":"Coupe","country":"Cuba","url":null},
+  "bamboo":{"family":"Aromatic","spirit":"sherry","glass":"Coupe","country":"Japan","url":null},
+  "banana_bliss":{"family":"Aromatic","spirit":"brandy","glass":"Nick & Nora","country":null,"url":null},
+  "banana_daiquiri":{"family":"Sour","spirit":"rum","glass":"Coupe","country":"USA","url":null},
+  "banana_frozen_daiquiri":{"family":"Sour","spirit":"rum","glass":"Coupe","country":"Cuba","url":null},
+  "barracuda":{"family":"Tiki","spirit":"rum","glass":"Coupe","country":"Italy","url":null},
+  "bb":{"family":"Other","spirit":"brandy","glass":"Old-fashioned","country":"USA","url":null},
+  "bees_knees":{"family":"Sour","spirit":"gin","glass":"Coupe","country":"France","url":"https://iba-world.com/iba-cocktail/bees-knees/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-bees-knees-6695d397e26c1.webp"},
+  "bellini":{"family":"Sparkling","spirit":"prosecco","glass":"Flute","country":"Italy","url":"https://iba-world.com/iba-cocktail/bellini/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-bellini-6695cda4217da.webp"},
+  "bentley":{"family":"Aromatic","spirit":"calvados","glass":"Coupe","country":null,"url":null},
+  "between_the_sheets":{"family":"Sour","spirit":"brandy","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/between-the-sheets/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-between-the-sheets-669491023d7af.webp"},
+  "black_russian":{"family":"Other","spirit":"vodka","glass":"Old-fashioned","country":"Belgium","url":"https://iba-world.com/iba-cocktail/black-russian/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-black-russian-6695cda4183dc.webp"},
+  "block_and_fall":{"family":"Aromatic","spirit":"brandy","glass":"Martini","country":null,"url":null},
+  "bloody_mary":{"family":"Other","spirit":"vodka","glass":"Collins","country":"France","url":"https://iba-world.com/iba-cocktail/bloody-mary/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-bloody-mary-6695cda72fe0f.webp"},
+  "blue_lagoon":{"family":"Highball","spirit":"vodka","glass":"Collins","country":"France","url":null},
+  "bobby_burns":{"family":"Aromatic","spirit":"whisky","glass":"Coupe","country":null,"url":null},
+  "bombay":{"family":"Aromatic","spirit":"brandy","glass":"Martini","country":null,"url":null},
+  "boulevardier":{"family":"Aromatic","spirit":"whiskey","glass":"Old-fashioned","country":"France","url":"https://iba-world.com/iba-cocktail/boulevardier/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-boulevardier-6694910552acd.webp"},
+  "bramble":{"family":"Sour","spirit":"gin","glass":"Double old-fashioned","country":"UK","url":"https://iba-world.com/iba-cocktail/bramble/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-bramble-6695d398036e1.webp"},
+  "alexander":{"family":"Cream/Dessert","spirit":"brandy","glass":"Coupe","country":"UK","url":"https://iba-world.com/iba-cocktail/alexander/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-alexander-669491364f7f2.webp"},
+  "brandy_crusta":{"family":"Sour","spirit":"brandy","glass":"Flute","country":"USA","url":"https://iba-world.com/iba-cocktail/brandy-crusta/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-brandy-crusta-6694910571bcb.webp"},
+  "brandy_egg_nog":{"family":"Flip","spirit":"brandy","glass":"Old-fashioned","country":null,"url":null},
+  "bronx":{"family":"Sour","spirit":"gin","glass":"Coupe","country":"USA","url":null},
+  "brooklyn":{"family":"Aromatic","spirit":"whiskey","glass":"Coupe","country":"USA","url":null},
+  "bucks_fizz":{"family":"Sparkling","spirit":"champagne","glass":"Flute","country":"UK","url":null},
+  "bull_shot":{"family":"Other","spirit":"vodka","glass":"Collins","country":null,"url":null},
+  "caipirinha":{"family":"Sour","spirit":"cachaça","glass":"Highball","country":"Brazil","url":"https://iba-world.com/iba-cocktail/caipirinha/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-caipirinha-6695cda74b13a.webp"},
+  "canchanchara":{"family":"Sour","spirit":"rum","glass":"Old-fashioned","country":"Cuba","url":"https://iba-world.com/iba-cocktail/canchanchara/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-canchanchara-6695d39b24d7e.webp"},
+  "cardinale":{"family":"Aromatic","spirit":"gin","glass":"Old-fashioned","country":"Italy","url":"https://iba-world.com/iba-cocktail/cardinale/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-cardinale-6695cdaa5f0d8.webp"},
+  "caruso":{"family":"Aromatic","spirit":"gin","glass":"Coupe","country":"UK","url":null},
+  "casino":{"family":"Sour","spirit":"gin","glass":"Nick & Nora","country":null,"url":"https://iba-world.com/iba-cocktail/casino/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-casino-6694910882cd6.webp"},
+  "champagne_cocktail":{"family":"Sparkling","spirit":"champagne","glass":"Flute","country":null,"url":"https://iba-world.com/iba-cocktail/champagne-cocktail/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-champagne-cocktail-6695cdaa71bb2.webp"},
+  "champagne_pick_me_up":{"family":"Sparkling","spirit":"champagne","glass":"Flute","country":"France","url":null},
+  "chartreuse_swizzle":{"family":"Tiki","spirit":"chartreuse","glass":"Collins","country":"USA","url":"https://iba-world.com/iba-cocktail/chartreuse-swizzle/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-chartreuse-swizzle-6695d39b326e0.webp"},
+  "claridge":{"family":"Aromatic","spirit":"gin","glass":"Nick & Nora","country":"France","url":null},
+  "clover_club":{"family":"Sour","spirit":"gin","glass":"Coupe","country":"USA","url":"https://iba-world.com/iba-cocktail/clover-club/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-clover-club-66949108a3e54.webp"},
+  "corpse_reviver_2":{"family":"Sour","spirit":"gin","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/corpse-reviver-2/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-corpse-reviver-2-6695cdad6da15.webp"},
+  "cosmopolitan":{"family":"Sour","spirit":"vodka","glass":"Martini","country":"USA","url":"https://iba-world.com/iba-cocktail/cosmopolitan/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-cosmopolitan-6695cdae389dc.webp"},
+  "cuba_libre":{"family":"Highball","spirit":"rum","glass":"Collins","country":"Cuba","url":"https://iba-world.com/iba-cocktail/cuba-libre/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-cuba-libre-6695cdb0a6f80.webp"},
+  "czarina":{"family":"Aromatic","spirit":"vodka","glass":"Coupe","country":null,"url":null},
+  "daiquiri":{"family":"Sour","spirit":"rum","glass":"Coupe","country":"Cuba","url":"https://iba-world.com/iba-cocktail/daiquiri/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-daiquiri-6694910c5866e.webp"},
+  "dark_n_stormy":{"family":"Highball","spirit":"rum","glass":"Collins","country":"Bermuda","url":"https://iba-world.com/iba-cocktail/dark-n-stormy/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-dark-n-stormy-6695d39e2bd94.webp"},
+  "derby":{"family":"Martini","spirit":"gin","glass":"Martini","country":"USA","url":null},
+  "diki_diki":{"family":"Sour","spirit":"calvados","glass":"Coupe","country":null,"url":null},
+  "dirty_martini":{"family":"Martini","spirit":"gin","glass":"Martini","country":"USA","url":null},
+  "dons_special_daiquiri":{"family":"Tiki","spirit":"rum","glass":"Tiki mug","country":"USA","url":"https://iba-world.com/iba-cocktail/dons-special-daiquiri/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-dons-special-daiquiri-6695d39e89fd7.webp"},
+  "dry_martini":{"family":"Martini","spirit":"gin","glass":"Martini","country":null,"url":"https://iba-world.com/iba-cocktail/dry-martini/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-dry-martini-6694910fb500c.webp"},
+  "duchess":{"family":"Aromatic","spirit":"vermouth","glass":"Coupe","country":null,"url":null},
+  "espresso_martini":{"family":"Other","spirit":"vodka","glass":"Martini","country":"UK","url":"https://iba-world.com/iba-cocktail/espresso-martini/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-espresso-martini-6695d3a172fd3.webp"},
+  "est_india":{"family":"Old Fashioned","spirit":"brandy","glass":"Coupe","country":null,"url":null},
+  "fernandito":{"family":"Highball","spirit":"fernet","glass":"Double old-fashioned","country":"Argentina","url":"https://iba-world.com/iba-cocktail/fernandito/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-fernandito-6695d3a1a3586.webp"},
+  "florida_non_alcoholic":{"family":"Other","spirit":"non-alcoholic","glass":"Collins","country":null,"url":null},
+  "french_75":{"family":"Sparkling","spirit":"gin","glass":"Flute","country":null,"url":"https://iba-world.com/iba-cocktail/french-75/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-french-75-6695cdb175e06.webp"},
+  "french_connection":{"family":"Other","spirit":"brandy","glass":"Old-fashioned","country":null,"url":"https://iba-world.com/iba-cocktail/french-connection/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-french-connection-6695cdb3cc15f.webp"},
+  "french_martini":{"family":"Martini","spirit":"vodka","glass":"Martini","country":"USA","url":"https://iba-world.com/iba-cocktail/french-martini/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-french-martini-6695d3a4acf5f.webp"},
+  "frozen_daiquiri":{"family":"Sour","spirit":"rum","glass":"Coupe","country":"Cuba","url":null},
+  "garibaldi":{"family":"Highball","spirit":"campari","glass":"Highball","country":"USA","url":"https://iba-world.com/iba-cocktail/garibaldi/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-garibaldi-6695cdb4cbf81.webp"},
+  "gibson":{"family":"Martini","spirit":"gin","glass":"Coupe","country":"USA","url":null},
+  "gimlet":{"family":"Sour","spirit":"gin","glass":"Coupe","country":null,"url":null},
+  "gin_and_french":{"family":"Martini","spirit":"gin","glass":"Old-fashioned","country":null,"url":null},
+  "gin_and_it":{"family":"Martini","spirit":"gin","glass":"Coupe","country":"UK","url":null},
+  "gin_basil_smash":{"family":"Sour","spirit":"gin","glass":"Old-fashioned","country":"Germany","url":"https://iba-world.com/iba-cocktail/gin-basil-smash/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-gin-basil-smash-6695d3a4c0967.webp"},
+  "gin_fizz":{"family":"Fizz","spirit":"gin","glass":"Highball","country":null,"url":"https://iba-world.com/iba-cocktail/gin-fizz/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-gin-fizz-6694910fc2eab.webp"},
+  "godfather":{"family":"Old Fashioned","spirit":"whisky","glass":"Old-fashioned","country":null,"url":null},
+  "godmother":{"family":"Old Fashioned","spirit":"vodka","glass":"Old-fashioned","country":null,"url":null},
+  "golden_cadillac":{"family":"Cream/Dessert","spirit":"galliano","glass":"Coupe","country":null,"url":null},
+  "golden_dream":{"family":"Cream/Dessert","spirit":"galliano","glass":"Coupe","country":null,"url":null},
+  "grand_margarita":{"family":"Sour","spirit":"tequila","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/grand-margarita/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-tommys-margarita-6695d3c7171ef.webp"},
+  "grand_slam":{"family":"Aromatic","spirit":"mixed","glass":"Coupe","country":null,"url":null},
+  "grasshopper":{"family":"Cream/Dessert","spirit":"crème de menthe","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/grasshopper/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-grasshopper-6695cdb737498.webp"},
+  "hanky_panky":{"family":"Martini","spirit":"gin","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/hanky-panky/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-hanky-panky-66949112edbf5.webp"},
+  "harvey_wallbanger":{"family":"Highball","spirit":"vodka","glass":"Highball","country":null,"url":null},
+  "hemingway_special":{"family":"Sour","spirit":"rum","glass":"Martini","country":"Cuba","url":"https://iba-world.com/iba-cocktail/hemingway-special/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-hemingway-special-6695cdb814e5a.webp"},
+  "horses_neck":{"family":"Highball","spirit":"whiskey","glass":"Highball","country":null,"url":"https://iba-world.com/iba-cocktail/horses-neck/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-horses-neck-6695cdba5fadc.webp"},
+  "iba_tiki":{"family":"Tiki","spirit":"rum","glass":"Tiki mug","country":null,"url":"https://iba-world.com/iba-cocktail/iba-tiki/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-iba-tiki-6695d3a7e33fd.webp"},
+  "illegal":{"family":"Sour","spirit":"mezcal","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/illegal/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-illegal-6695d3a7de51f.webp"},
+  "irish_coffee":{"family":"Other","spirit":"whiskey","glass":"Toddy","country":"Ireland","url":"https://iba-world.com/iba-cocktail/irish-coffee/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-irish-coffee-copy-6695cdbb430cd.webp"},
+  "japanese_slipper":{"family":"Sour","spirit":"melon liqueur","glass":"Martini","country":"Australia","url":null},
+  "john_collins":{"family":"Collins","spirit":"gin","glass":"Collins","country":"UK","url":"https://iba-world.com/iba-cocktail/john-collins/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-john-collins-669491130ef87.webp"},
+  "jungle_bird":{"family":"Tiki","spirit":"rum","glass":"Old-fashioned","country":"Malaysia","url":"https://iba-world.com/iba-cocktail/jungle-bird/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-jungle-bird-6695d3ab45a87.webp"},
+  "kamikaze":{"family":"Shooter","spirit":"vodka","glass":"Shot","country":null,"url":null},
+  "king_alfonso":{"family":"Shooter","spirit":"mixed","glass":"Shot","country":null,"url":null},
+  "kir":{"family":"Martini","spirit":"vodka","glass":"Martini","country":"England","url":"https://iba-world.com/iba-cocktail/kir/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-kir-6695cdbdbb2e1.webp"},
+  "kir_imperial":{"family":"Sparkling","spirit":"champagne","glass":"Flute","country":null,"url":null},
+  "kir_royal":{"family":"Sparkling","spirit":"champagne","glass":"Flute","country":"France","url":null},
+  "ladyboy":{"family":"Cream/Dessert","spirit":"brandy","glass":"Old-fashioned","country":null,"url":null},
+  "last_word":{"family":"Sour","spirit":"gin","glass":"Coupe","country":"USA","url":"https://iba-world.com/iba-cocktail/last-word/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-last-word-6694911607ddf.webp"},
+  "lemon_drop_martini":{"family":"Martini","spirit":"vodka","glass":"Martini","country":"USA","url":"https://iba-world.com/iba-cocktail/lemon-drop-martini/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-lemon-drop-martini-6695cdbe3eed7.webp"},
+  "long_island_iced_tea":{"family":"Collins","spirit":"mixed","glass":"Collins","country":"USA","url":"https://iba-world.com/iba-cocktail/long-island-iced-tea/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-long-island-iced-tea-6695cdc10c463.webp"},
+  "mai_tai":{"family":"Tiki","spirit":"rum","glass":"Double old-fashioned","country":"USA","url":"https://iba-world.com/iba-cocktail/mai-tai/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-mai-tai-6695cdc169ea3.webp"},
+  "manhattan":{"family":"Aromatic","spirit":"whiskey","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/manhattan/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-manhattan-6694911627de7.webp"},
+  "manhattan_dry":{"family":"Aromatic","spirit":"whiskey","glass":"Coupe","country":null,"url":null},
+  "manhattan_perfect":{"family":"Aromatic","spirit":"whiskey","glass":"Coupe","country":null,"url":null},
+  "margarita":{"family":"Sour","spirit":"tequila","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/margarita/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-margarita-6695cdd7505e0.webp"},
+  "martinez":{"family":"Martini","spirit":"gin","glass":"Nick & Nora","country":null,"url":"https://iba-world.com/iba-cocktail/martinez/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-martinez-6694911927849.webp"},
+  "martini":{"family":"Martini","spirit":"gin","glass":"Martini","country":null,"url":null},
+  "martini_perfect":{"family":"Martini","spirit":"gin","glass":"Martini","country":null,"url":null},
+  "martini_sweet":{"family":"Martini","spirit":"gin","glass":"Martini","country":null,"url":null},
+  "martini_vodka":{"family":"Martini","spirit":"vodka","glass":"Martini","country":"USA","url":null},
+  "mary_pickford":{"family":"Sour","spirit":"rum","glass":"Coupe","country":"Cuba","url":"https://iba-world.com/iba-cocktail/mary-pickford/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-mary-pickford-6694911933ea7.webp"},
+  "mikado":{"family":"Aromatic","spirit":"brandy","glass":"Coupe","country":null,"url":null},
+  "mimosa":{"family":"Sparkling","spirit":"champagne","glass":"Goblet","country":"France","url":"https://iba-world.com/iba-cocktail/mimosa/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-mimosa-6695cdc4463c9.webp"},
+  "mint_julep":{"family":"Old Fashioned","spirit":"whiskey","glass":"Julep cup","country":null,"url":"https://iba-world.com/iba-cocktail/mint-julep/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-mint-julep-6695cdc4aa398.webp"},
+  "missionarys_downfall":{"family":"Tiki","spirit":"rum","glass":"Collins","country":"USA","url":"https://iba-world.com/iba-cocktail/missionarys-downfall/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-missionarys-downfall-6695d3ab4d4c5.webp"},
+  "mojito":{"family":"Collins","spirit":"rum","glass":"Collins","country":null,"url":"https://iba-world.com/iba-cocktail/mojito/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-mojito-6695cdc755626.webp"},
+  "monkey_gland":{"family":"Sour","spirit":"gin","glass":"Coupe","country":"France","url":"https://iba-world.com/iba-cocktail/monkey-gland/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-monkey-gland-6694911cbf5a2.webp"},
+  "moscow_mule":{"family":"Highball","spirit":"vodka","glass":"Copper mug","country":"USA","url":"https://iba-world.com/iba-cocktail/moscow-mule/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-moscow-mule-6695cdc7d8cb2.webp"},
+  "naked_and_famous":{"family":"Sour","spirit":"mezcal","glass":"Coupe","country":"USA","url":"https://iba-world.com/iba-cocktail/naked-and-famous/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-naked-and-famous-6695d3ae8e1dc.webp"},
+  "negroni":{"family":"Aromatic","spirit":"gin","glass":"Old-fashioned","country":null,"url":"https://iba-world.com/iba-cocktail/negroni/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-negroni-6694911cc3b65.webp"},
+  "new_york_sour":{"family":"Sour","spirit":"whiskey","glass":"Old-fashioned","country":"USA","url":"https://iba-world.com/iba-cocktail/new-york-sour/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-new-york-sour-6695d3ae88cd2.webp"},
+  "old_cuban":{"family":"Sparkling","spirit":"rum","glass":"Coupe","country":"USA","url":"https://iba-world.com/iba-cocktail/old-cuban/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-old-cuban-6695d3b18c692.webp"},
+  "old_fashioned":{"family":"Old Fashioned","spirit":"whiskey","glass":"Old-fashioned","country":null,"url":"https://iba-world.com/iba-cocktail/old-fashioned/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-old-fashioned-6694911fce360.webp"},
+  "old_pal":{"family":"Aromatic","spirit":"whiskey","glass":"Old-fashioned","country":"France","url":null},
+  "orange_blossom":{"family":"Sour","spirit":"gin","glass":"Coupe","country":null,"url":null},
+  "orgasm":{"family":"Cream/Dessert","spirit":"vodka","glass":"Old-fashioned","country":null,"url":null},
+  "oriental":{"family":"Sour","spirit":"whiskey","glass":"Coupe","country":null,"url":null},
+  "paloma":{"family":"Highball","spirit":"tequila","glass":"Collins","country":"Mexico","url":"https://iba-world.com/iba-cocktail/paloma/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-paloma-6695d3b19cda4.webp"},
+  "paper_plane":{"family":"Sour","spirit":"whiskey","glass":"Coupe","country":"USA","url":"https://iba-world.com/iba-cocktail/paper-plane/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-paper-plane-6695d3b4745eb.webp"},
+  "paradise":{"family":"Sour","spirit":"gin","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/paradise/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-paradise-6694911fdbd4b.webp"},
+  "parisian":{"family":"Martini","spirit":"gin","glass":"Coupe","country":null,"url":null},
+  "parsons_special_non_alcoholic":{"family":"Other","spirit":"non-alcoholic","glass":"Old-fashioned","country":null,"url":null},
+  "penicillin":{"family":"Sour","spirit":"whisky","glass":"Old-fashioned","country":"USA","url":"https://iba-world.com/iba-cocktail/penicillin/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-penicillin-6695d3b47b79f.webp"},
+  "pimms_cup_no_1":{"family":"Highball","spirit":"pimms","glass":"Collins","country":null,"url":null},
+  "pina_colada":{"family":"Tiki","spirit":"rum","glass":"Pineapple shell","country":null,"url":"https://iba-world.com/iba-cocktail/pina-colada/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-pina-colada-6695cdcabbf00.webp"},
+  "pisco_punch":{"family":"Punch","spirit":"pisco","glass":"Goblet","country":"USA","url":"https://iba-world.com/iba-cocktail/pisco-punch/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-pisco-punch-6695d3b74b9f5.webp"},
+  "pisco_sour":{"family":"Sour","spirit":"pisco","glass":"Coupe","country":"Peru","url":"https://iba-world.com/iba-cocktail/pisco-sour/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-pisco-sour-6695cdcaf1122.webp"},
+  "planters_punch":{"family":"Punch","spirit":"rum","glass":"Collins","country":null,"url":"https://iba-world.com/iba-cocktail/planters-punch/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-planters-punch-66949122d41fb.webp"},
+  "porn_star_martini":{"family":"Martini","spirit":"vodka","glass":"Coupe","country":"UK","url":"https://iba-world.com/iba-cocktail/porn-star-martini/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-porn-star-martini-6695d3b771b97.webp"},
+  "porto_flip":{"family":"Flip","spirit":"port","glass":"Nick & Nora","country":null,"url":"https://iba-world.com/iba-cocktail/porto-flip/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-porto-flip-669491230cea4.webp"},
+  "prairie_oyster":{"family":"Other","spirit":"non-alcoholic","glass":"Coupe","country":"Germany","url":null},
+  "princeton":{"family":"Aromatic","spirit":"gin","glass":"Coupe","country":null,"url":null},
+  "pussy_foot":{"family":"Other","spirit":"non-alcoholic","glass":"Collins","country":"England","url":null},
+  "rabo_de_galo":{"family":"Aromatic","spirit":"cachaça","glass":"Old-fashioned","country":"Brazil","url":"https://iba-world.com/iba-cocktail/rabo-de-galo/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-rabo-de-galo-6695cdcdb2df1.webp"},
+  "ramos_gin_fizz":{"family":"Fizz","spirit":"gin","glass":"Collins","country":"USA","url":"https://iba-world.com/iba-cocktail/ramos-fizz/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-ramos-fizz-669491260ca6c.webp"},
+  "remember_the_maine":{"family":"Aromatic","spirit":"whiskey","glass":"Nick & Nora","country":"Cuba","url":"https://iba-world.com/iba-cocktail/remember-the-maine/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-remember-the-main-6694912622959.webp"},
+  "rob_roy":{"family":"Aromatic","spirit":"whisky","glass":"Coupe","country":"USA","url":null},
+  "rose":{"family":"Aromatic","spirit":"wine","glass":"Martini","country":"France","url":"https://en.wikipedia.org/wiki/Rose_(cocktail)"},
+  "russian_spring_punch":{"family":"Sparkling","spirit":"vodka","glass":"Sling","country":"England","url":"https://iba-world.com/iba-cocktail/russian-spring-punch/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-russian-spring-punch-6695d3ba314f1.webp"},
+  "rusty_nail":{"family":"Old Fashioned","spirit":"whisky","glass":"Old-fashioned","country":"USA","url":"https://iba-world.com/iba-cocktail/rusty-nail/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-rusty-nail-66949129acfd1.webp"},
+  "salty_dog":{"family":"Highball","spirit":"vodka","glass":"Highball","country":null,"url":null},
+  "sazerac":{"family":"Old Fashioned","spirit":"whiskey","glass":"Old-fashioned","country":"USA","url":"https://iba-world.com/iba-cocktail/sazerac/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-sazerac-66949129b50d1.webp"},
+  "screwdriver":{"family":"Highball","spirit":"vodka","glass":"Highball","country":null,"url":null},
+  "sea_breeze":{"family":"Highball","spirit":"vodka","glass":"Collins","country":null,"url":"https://iba-world.com/iba-cocktail/sea-breeze/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-sea-breeze-6695cdce015a8.webp"},
+  "sex_on_the_beach":{"family":"Highball","spirit":"vodka","glass":"Collins","country":null,"url":"https://iba-world.com/iba-cocktail/sex-on-the-beach/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-sex-on-the-beach-6695cdd0aecf3.webp"},
+  "sherry_cobbler":{"family":"Other","spirit":"sherry","glass":"Collins","country":null,"url":"https://iba-world.com/iba-cocktail/sherry-cobbler/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-sherry-cobbler-6695d3ba8bdb7.webp"},
+  "shirley_temple":{"family":"Other","spirit":"non-alcoholic","glass":"Collins","country":"USA","url":null},
+  "sidecar":{"family":"Sour","spirit":"brandy","glass":"Coupe","country":"UK","url":"https://iba-world.com/iba-cocktail/sidecar/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-sidecar-6694912cb8aa9.webp"},
+  "singapore_sling":{"family":"Collins","spirit":"gin","glass":"Sling","country":"Singapore","url":"https://iba-world.com/iba-cocktail/singapore-sling/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-singapore-sling-6695cdd136426.webp"},
+  "snowball":{"family":"Highball","spirit":"advocaat","glass":"Collins","country":null,"url":null},
+  "south_side":{"family":"Sour","spirit":"gin","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/south-side/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-south-side-6695d3bdcc9fe.webp"},
+  "spicy_fifty":{"family":"Martini","spirit":"vodka","glass":"Martini","country":"England","url":"https://iba-world.com/iba-cocktail/spicy-fifty/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-spicy-fifty-6695d3bdd14b1.webp"},
+  "spritz":{"family":"Sparkling","spirit":"prosecco","glass":"Old-fashioned","country":"Italy","url":"https://iba-world.com/iba-cocktail/spritz/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-spritz-6695d3c0f113f.webp"},
+  "spritzer":{"family":"Sparkling","spirit":"wine","glass":"Goblet","country":null,"url":null},
+  "stinger":{"family":"Old Fashioned","spirit":"brandy","glass":"Old-fashioned","country":null,"url":"https://iba-world.com/iba-cocktail/stinger/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-stinger-6694912ce0b8d.webp"},
+  "strawberry_daiquiri":{"family":"Sour","spirit":"rum","glass":"Coupe","country":null,"url":null},
+  "suffering_bastard":{"family":"Tiki","spirit":"mixed","glass":"Tiki mug","country":"Egypt","url":"https://iba-world.com/iba-cocktail/suffering-bastard/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-suffering-bastard-6695d3c1081c4.webp"},
+  "tequila_sunrise":{"family":"Highball","spirit":"tequila","glass":"Collins","country":"USA","url":"https://iba-world.com/iba-cocktail/tequila-sunrise/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-tequila-sunrise-6695cdd3da10a.webp"},
+  "tequini":{"family":"Martini","spirit":"tequila","glass":"Martini","country":null,"url":null},
+  "three_dots_and_a_dash":{"family":"Tiki","spirit":"rum","glass":"Tiki mug","country":"USA","url":"https://iba-world.com/iba-cocktail/three-dots-and-a-dash/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-three-dots-and-a-dash-6695d3c3e2d24.webp"},
+  "tipperary":{"family":"Aromatic","spirit":"whiskey","glass":"Nick & Nora","country":null,"url":"https://iba-world.com/iba-cocktail/tipperary/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-tipperary-6695d3c453fd3.webp"},
+  "tom_collins":{"family":"Collins","spirit":"gin","glass":"Collins","country":"UK","url":null},
+  "tommys_margarita":{"family":"Sour","spirit":"tequila","glass":"Old-fashioned","country":"USA","url":"https://iba-world.com/iba-cocktail/tommys-margarita/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-tommys-margarita-6695d3c7171ef.webp"},
+  "trinidad_sour":{"family":"Sour","spirit":"whiskey","glass":"Coupe","country":"USA","url":"https://iba-world.com/iba-cocktail/trinidad-sour/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-trinidad-sour-6695d3c794a43.webp"},
+  "tuxedo":{"family":"Martini","spirit":"gin","glass":"Coupe","country":null,"url":"https://iba-world.com/iba-cocktail/tuxedo/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-tuxedo-6694912fd3b8f.webp"},
+  "vampiro":{"family":"Highball","spirit":"tequila","glass":"Old-fashioned","country":"Mexico","url":null},
+  "velvet_hammer":{"family":"Cream/Dessert","spirit":"vodka","glass":"Coupe","country":null,"url":null},
+  "vento":{"family":"Sour","spirit":"brandy","glass":"Coupe","country":"Italy","url":"https://iba-world.com/iba-cocktail/ve-n-to/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-new-era-vento-6695d3ca45bc2.webp"},
+  "vesper_martini":{"family":"Martini","spirit":"gin","glass":"Martini","country":null,"url":"https://iba-world.com/iba-cocktail/vesper/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-vesper-6695cdd43284b.webp"},
+  "vieux_carre":{"family":"Aromatic","spirit":"whiskey","glass":"Old-fashioned","country":"USA","url":"https://iba-world.com/iba-cocktail/vieux-carre/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-vieux-carre-6694913015248.webp"},
+  "whiskey_sour":{"family":"Sour","spirit":"whiskey","glass":"Old-fashioned","country":null,"url":"https://iba-world.com/iba-cocktail/whiskey-sour/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-whiskey-sour-66949132e6ae9.webp"},
+  "white_lady":{"family":"Sour","spirit":"gin","glass":"Coupe","country":"UK","url":"https://iba-world.com/iba-cocktail/white-lady/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-the-unforgettables-white-lady-6694913318105.webp"},
+  "white_russian":{"family":"Cream/Dessert","spirit":"vodka","glass":"Old-fashioned","country":null,"url":null},
+  "white_spider":{"family":"Martini","spirit":"vodka","glass":"Nick & Nora","country":"UK","url":null},
+  "yellow_bird":{"family":"Tiki","spirit":"rum","glass":"Collins","country":"USA","url":null},
+  "za_za":{"family":"Martini","spirit":"gin","glass":"Coupe","country":"France","url":null},
+  "zombie":{"family":"Tiki","spirit":"rum","glass":"Collins","country":"USA","url":"https://iba-world.com/iba-cocktail/zombie/","img":"https://iba-world.com/wp-content/uploads/2024/07/iba-cocktail-contemporary-classics-zombie-6695cdd6cef05.webp"}
+};
+
+// Country → emoji flag
+const FLAGS = {
+  "USA":"🇺🇸","UK":"🇬🇧","France":"🇫🇷","Italy":"🇮🇹","Cuba":"🇨🇺","Japan":"🇯🇵",
+  "Belgium":"🇧🇪","Canada":"🇨🇦","Germany":"🇩🇪","Brazil":"🇧🇷","Mexico":"🇲🇽",
+  "Ireland":"🇮🇪","Singapore":"🇸🇬","Peru":"🇵🇪","Jamaica":"🇯🇲","Egypt":"🇪🇬",
+  "Argentina":"🇦🇷","Australia":"🇦🇺","Bermuda":"🇧🇲","Malaysia":"🇲🇾",
+  "Puerto Rico":"🇵🇷","Spain":"🇪🇸","Portugal":"🇵🇹"
+};
+
+// ── TIMELINE DATA ──
+const RAW = [
+  ["adonis",1961,1987,null],["affinity",1961,1987,null],["alaska",1961,1987,null],
+  ["alexander",1961,2011,null],["alexander",2011,null,"The Unforgettables"],
+  ["americano",1987,2011,null],["americano",2011,null,"The Unforgettables"],
+  ["angel_face",1961,1987,null],["angel_face",2011,null,"The Unforgettables"],
+  ["apotheke",1987,1993,null],["apple_martini",2004,2011,null],
+  ["aviation",2011,null,"The Unforgettables"],
+  ["b_52",2004,2011,null],["b_52",2011,2020,"New Era"],
+  ["bacardi_cocktail",1961,2011,null],["bacardi_cocktail",2011,2020,"The Unforgettables"],
+  ["bamboo",1961,1987,null],["banana_bliss",1987,1993,null],["banana_daiquiri",1987,1993,null],
+  ["banana_daiquiri",2004,2011,null],["banana_frozen_daiquiri",1993,2004,null],
+  ["barracuda",2011,2024,"New Era"],["bb",1987,1993,null],
+  ["bees_knees",2020,null,"New Era"],["bellini",1987,2011,null],["bellini",2011,null,"Contemporary Classics"],
+  ["bentley",1961,1987,null],["between_the_sheets",1961,1987,null],["between_the_sheets",2011,null,"The Unforgettables"],
+  ["black_russian",1987,2011,null],["black_russian",2011,null,"Contemporary Classics"],
+  ["block_and_fall",1961,1987,null],["bloody_mary",1961,2011,null],["bloody_mary",2011,null,"Contemporary Classics"],
+  ["blue_lagoon",1987,1993,null],["bobby_burns",1961,1987,null],["bombay",1961,1987,null],
+  ["boulevardier",2020,null,"The Unforgettables"],["bramble",2011,null,"New Era"],
+  ["brandy_crusta",2020,null,"The Unforgettables"],["brandy_egg_nog",1987,2011,null],
+  ["bronx",1961,2011,null],["brooklyn",1961,1987,null],["bucks_fizz",1987,2011,null],
+  ["bull_shot",1987,2011,null],["caipirinha",2004,2011,null],["caipirinha",2011,null,"Contemporary Classics"],
+  ["canchanchara",2020,null,"New Era"],["cardinale",2024,null,"Contemporary Classics"],
+  ["caruso",1961,1987,null],["casino",1961,1987,null],["casino",2011,null,"The Unforgettables"],
+  ["champagne_cocktail",1987,2011,null],["champagne_cocktail",2011,null,"Contemporary Classics"],
+  ["champagne_pick_me_up",1987,1993,null],["chartreuse_swizzle",2024,null,"New Era"],
+  ["claridge",1961,1987,null],["clover_club",1961,1987,null],["clover_club",2011,null,"The Unforgettables"],
+  ["corpse_reviver_2",2020,null,"Contemporary Classics"],["cosmopolitan",2004,2011,null],["cosmopolitan",2011,null,"Contemporary Classics"],
+  ["cuba_libre",2004,2011,null],["cuba_libre",2011,null,"Contemporary Classics"],
+  ["czarina",1961,1987,null],["daiquiri",1961,2011,null],["daiquiri",2011,null,"The Unforgettables"],
+  ["dark_n_stormy",2011,null,"New Era"],["derby",1961,1987,null],["derby",2011,2020,"The Unforgettables"],
+  ["diki_diki",1961,1987,null],["dirty_martini",2011,2020,"New Era"],
+  ["dons_special_daiquiri",2024,null,"New Era"],["dry_martini",1961,2011,null],["dry_martini",2011,null,"The Unforgettables"],
+  ["duchess",1961,1987,null],["espresso_martini",2011,null,"New Era"],["est_india",1961,1987,null],
+  ["fernandito",2020,null,"New Era"],["florida_non_alcoholic",1987,2004,null],
+  ["french_75",2011,null,"Contemporary Classics"],["french_connection",1987,2011,null],["french_connection",2011,null,"Contemporary Classics"],
+  ["french_martini",2011,null,"New Era"],["frozen_daiquiri",1987,2011,null],
+  ["garibaldi",1987,2004,null],["garibaldi",2024,null,"Contemporary Classics"],
+  ["gibson",1961,2011,null],["gimlet",1987,1993,null],["gin_and_french",1987,2004,null],
+  ["gin_and_it",1961,2004,null],["gin_basil_smash",2024,null,"New Era"],
+  ["gin_fizz",1987,2011,null],["gin_fizz",2011,null,"The Unforgettables"],
+  ["godfather",1987,2011,null],["godfather",2011,2020,"Contemporary Classics"],
+  ["godmother",1987,2011,null],["godmother",2011,2020,"Contemporary Classics"],
+  ["golden_cadillac",1987,2011,null],["golden_dream",1987,2011,null],["golden_dream",2011,2024,"Contemporary Classics"],
+  ["grand_margarita",2024,null,"New Era"],["grand_slam",1961,1987,null],
+  ["grasshopper",1961,2011,null],["grasshopper",2011,null,"Contemporary Classics"],
+  ["hanky_panky",2020,null,"The Unforgettables"],["harvey_wallbanger",1987,2011,null],["harvey_wallbanger",2011,2020,"Contemporary Classics"],
+  ["hemingway_special",2011,null,"Contemporary Classics"],["horses_neck",1987,2011,null],["horses_neck",2011,null,"Contemporary Classics"],
+  ["iba_tiki",2024,null,"New Era"],["illegal",2020,null,"New Era"],
+  ["irish_coffee",1987,2011,null],["irish_coffee",2011,null,"Contemporary Classics"],
+  ["japanese_slipper",2004,2011,null],["john_collins",1993,2011,null],["john_collins",2011,null,"The Unforgettables"],
+  ["jungle_bird",2024,null,"New Era"],["kamikaze",2004,2011,null],["kamikaze",2011,2020,"New Era"],
+  ["king_alfonso",1987,1993,null],["kir",1987,2011,null],["kir",2011,null,"Contemporary Classics"],
+  ["kir_imperial",1987,1993,null],["kir_royal",1987,2011,null],
+  ["ladyboy",2004,2011,null],["last_word",2020,null,"The Unforgettables"],
+  ["lemon_drop_martini",2011,null,"New Era"],["lemon_drop_martini",2024,null,"Contemporary Classics"],
+  ["long_island_iced_tea",2004,2011,null],["long_island_iced_tea",2011,null,"Contemporary Classics"],
+  ["mai_tai",1987,1993,null],["mai_tai",2004,2011,null],["mai_tai",2011,null,"Contemporary Classics"],
+  ["manhattan",1961,2011,null],["manhattan",2011,null,"The Unforgettables"],
+  ["manhattan_dry",1993,2011,null],["manhattan_perfect",1993,2011,null],
+  ["margarita",1987,2011,null],["margarita",2011,null,"Contemporary Classics"],
+  ["martinez",2020,null,"The Unforgettables"],["martini",1987,1993,null],
+  ["martini_perfect",1993,2011,null],["martini_sweet",1961,1987,null],["martini_sweet",1993,2011,null],
+  ["martini_vodka",1987,2011,null],["mary_pickford",1961,1987,null],["mary_pickford",2011,null,"The Unforgettables"],
+  ["mikado",1961,1987,null],["mimosa",2004,2011,null],["mimosa",2011,null,"Contemporary Classics"],
+  ["mint_julep",2011,null,"Contemporary Classics"],["missionarys_downfall",2024,null,"New Era"],
+  ["mojito",2004,2011,null],["mojito",2011,null,"Contemporary Classics"],
+  ["monkey_gland",1961,1987,null],["monkey_gland",2011,null,"The Unforgettables"],
+  ["moscow_mule",2011,null,"Contemporary Classics"],["naked_and_famous",2020,null,"New Era"],
+  ["negroni",1961,2011,null],["negroni",2011,null,"The Unforgettables"],
+  ["new_york_sour",2020,null,"New Era"],["old_cuban",2020,null,"New Era"],
+  ["old_fashioned",1961,2011,null],["old_fashioned",2011,null,"The Unforgettables"],
+  ["old_pal",1961,1987,null],["orange_blossom",1961,1987,null],["orgasm",2004,2011,null],
+  ["oriental",1961,1987,null],["paloma",2020,null,"New Era"],["paper_plane",2020,null,"New Era"],
+  ["paradise",1961,2011,null],["paradise",2011,null,"The Unforgettables"],
+  ["parisian",1961,1987,null],["parsons_special_non_alcoholic",1993,2004,null],
+  ["penicillin",2020,null,"New Era"],["pimms_cup_no_1",1987,1993,null],
+  ["pina_colada",1987,2011,null],["pina_colada",2011,null,"Contemporary Classics"],
+  ["pisco_punch",2024,null,"New Era"],["pisco_sour",2011,2020,"New Era"],["pisco_sour",2020,null,"Contemporary Classics"],
+  ["planters_punch",1961,2011,null],["planters_punch",2011,null,"The Unforgettables"],
+  ["porn_star_martini",2024,null,"New Era"],["porto_flip",1987,2011,null],["porto_flip",2011,null,"The Unforgettables"],
+  ["prairie_oyster",1987,1993,null],["princeton",1961,1987,null],["pussy_foot",1987,2004,null],
+  ["rabo_de_galo",2024,null,"Contemporary Classics"],["ramos_gin_fizz",2011,null,"The Unforgettables"],
+  ["remember_the_maine",2024,null,"The Unforgettables"],["rob_roy",1961,2011,null],
+  ["rose",1961,2011,null],["rose",2011,2020,"Contemporary Classics"],
+  ["russian_spring_punch",2011,null,"New Era"],["rusty_nail",1987,2011,null],["rusty_nail",2011,null,"The Unforgettables"],
+  ["salty_dog",1987,1993,null],["salty_dog",2004,2011,null],["sazerac",2011,null,"The Unforgettables"],
+  ["screwdriver",1987,2011,null],["screwdriver",2011,2020,"The Unforgettables"],
+  ["sea_breeze",2004,2011,null],["sea_breeze",2011,null,"Contemporary Classics"],
+  ["sex_on_the_beach",2004,2011,null],["sex_on_the_beach",2011,null,"Contemporary Classics"],
+  ["sherry_cobbler",2024,null,"New Era"],["shirley_temple",1987,2004,null],
+  ["sidecar",1961,2004,null],["sidecar",2011,null,"The Unforgettables"],
+  ["singapore_sling",1987,2011,null],["singapore_sling",2011,null,"Contemporary Classics"],
+  ["snowball",1987,1993,null],["south_side",2020,null,"New Era"],["spicy_fifty",2020,null,"New Era"],
+  ["spritz",2011,null,"New Era"],["spritzer",1987,1993,null],
+  ["stinger",1961,2004,null],["stinger",2011,null,"The Unforgettables"],
+  ["strawberry_daiquiri",1987,1993,null],["suffering_bastard",2020,null,"New Era"],
+  ["tequila_sunrise",1987,2011,null],["tequila_sunrise",2011,null,"Contemporary Classics"],
+  ["tequini",1987,1993,null],["three_dots_and_a_dash",2024,null,"New Era"],
+  ["tipperary",2020,null,"New Era"],["tom_collins",1987,1993,null],
+  ["tommys_margarita",2011,null,"New Era"],["trinidad_sour",2020,null,"New Era"],
+  ["tuxedo",2011,null,"The Unforgettables"],["vampiro",2011,2020,"New Era"],
+  ["velvet_hammer",1987,1993,null],["vento",2020,null,"New Era"],
+  ["vesper_martini",2011,2020,"New Era"],["vesper_martini",2020,null,"Contemporary Classics"],
+  ["vieux_carre",2020,null,"The Unforgettables"],["whiskey_sour",1987,2011,null],["whiskey_sour",2011,null,"The Unforgettables"],
+  ["white_lady",1961,2004,null],["white_lady",2011,null,"The Unforgettables"],
+  ["white_russian",1987,2011,null],["white_spider",1987,1993,null],
+  ["yellow_bird",2011,2024,"New Era"],["za_za",1961,1987,null],["zombie",2020,null,"Contemporary Classics"]
+];
+
+const EDITIONS = [
+  {index:0,label:"1st edition",start:1961,end:1987},
+  {index:1,label:"2nd edition",start:1987,end:1993},
+  {index:2,label:"3rd edition",start:1993,end:2004},
+  {index:3,label:"4th edition",start:2004,end:2011},
+  {index:4,label:"5th edition",start:2011,end:2020},
+  {index:5,label:"6th edition",start:2020,end:2024},
+  {index:6,label:"7th edition",start:2024,end:null}
+];
+
+const COLORS = {
+  null:"#C8C8C0","The Unforgettables":"#7F77DD",
+  "Contemporary Classics":"#1D9E75","New Era":"#D85A30"
+};
+const CAT_RANK = {"The Unforgettables":0,"Contemporary Classics":1,"New Era":2,null:3};
+
+function fmt(name) { return name.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+
+function editionIndicesForSegment(seg) {
+  return EDITIONS.filter(ed => seg.ya <= ed.start && (seg.yr > ed.start || seg.yr === null)).map(ed=>ed.index);
+}
+function countEditionsTotal(segments) {
+  const s = new Set();
+  for (const seg of segments) for (const idx of editionIndicesForSegment(seg)) s.add(idx);
+  return s.size;
+}
+
+function buildCocktails() {
+  const map = new Map();
+  for (const [name,ya,yr,cat] of RAW) {
+    if (!map.has(name)) map.set(name,{name,segments:[]});
+    map.get(name).segments.push({ya,yr,cat});
+  }
+  return Array.from(map.values()).map(c => {
+    const firstYear = Math.min(...c.segments.map(s=>s.ya));
+    const stillActive = c.segments.some(s=>s.yr===null);
+    const editionCount = countEditionsTotal(c.segments);
+    const oneHit = editionCount===1 && !stillActive;
+    const currentCat = stillActive
+      ? c.segments.filter(s=>s.yr === null).at(-1).cat
+      : c.segments.reduce((a,b)=>b.ya>a.ya?b:a).cat;
+    const sorted = [...c.segments].sort((a,b)=>a.ya-b.ya);
+    let isComeback = false;
+    for (let i=1;i<sorted.length;i++) {
+      if (EDITIONS.some(ed=>ed.start>=sorted[i-1].yr && ed.start<sorted[i].ya)) { isComeback=true; break; }
+    }
+    const catOrder = {"New Era":2,"Contemporary Classics":1,"The Unforgettables":0};
+    const catSegs = c.segments.filter(s=>s.cat!==null).sort((a,b)=>a.ya-b.ya);
+    let isRisingStar = false;
+    for (let i=1;i<catSegs.length;i++) {
+      if ((catOrder[catSegs[i-1].cat]??9)>(catOrder[catSegs[i].cat]??9)) { isRisingStar=true; break; }
+    }
+    const isFallen = !stillActive && c.segments.some(s=>s.cat!==null);
+    const sc = SCRAPED[c.name] || {};
+    return {...c, firstYear, editionCount, oneHit, currentCat, stillActive, isComeback, isRisingStar, isFallen,
+      family: sc.family||null, spirit: sc.spirit||null, glass: sc.glass||null,
+      country: sc.country||null, url: sc.url||null, img: sc.img||null,
+      flag: FLAGS[sc.country]||null
+    };
+  }).sort((a,b)=>
+    b.editionCount-a.editionCount||
+    a.firstYear-b.firstYear||
+    (CAT_RANK[a.currentCat]??3)-(CAT_RANK[b.currentCat]??3)||
+    a.name.localeCompare(b.name)
+  );
+}
+
+const allCocktails = buildCocktails();
+
+document.getElementById('stat-total').textContent = allCocktails.length;
+document.getElementById('stat-active').textContent = allCocktails.filter(c=>c.stillActive).length;
+document.getElementById('stat-7ed').textContent = allCocktails.filter(c=>c.editionCount===7).length;
+document.getElementById('stat-onehit').textContent = allCocktails.filter(c=>c.oneHit).length;
+
+// ── VIEW SWITCHER ──
+let currentView = 'timeline';
+const viewTrigger = document.getElementById('view-trigger');
+const viewDropdown = document.getElementById('view-dropdown');
+const viewLabel = document.getElementById('view-label');
+
+viewTrigger.addEventListener('click', e => {
+  e.stopPropagation();
+  viewTrigger.classList.toggle('open');
+  viewDropdown.classList.toggle('open');
+});
+document.addEventListener('click', () => {
+  viewTrigger.classList.remove('open');
+  viewDropdown.classList.remove('open');
+});
+viewDropdown.addEventListener('click', e => {
+  const btn = e.target.closest('.view-option');
+  if (!btn) return;
+  const view = btn.dataset.view;
+  document.querySelectorAll('.view-option').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  viewLabel.textContent = btn.textContent;
+  viewTrigger.classList.remove('open');
+  viewDropdown.classList.remove('open');
+  switchView(view);
+});
+
+function switchView(view) {
+  currentView = view;
+  // Hide all views first
+  document.getElementById('timeline-view').style.display = 'none';
+  document.getElementById('timeline-controls').style.display = 'none';
+  document.getElementById('dist-container').style.display = 'none';
+  document.getElementById('board-container').style.display = 'none';
+
+  if (view === 'timeline') {
+    document.getElementById('timeline-view').style.display = 'block';
+    document.getElementById('timeline-controls').style.display = 'flex';
+    document.getElementById('intro-text').textContent = 'A visual record of every cocktail listed across all seven editions of the IBA\'s official selection. Track which drinks survived every revision, which were lost to time, and which arrived only recently.';
+  } else if (view === 'distribution') {
+    document.getElementById('dist-container').style.display = 'block';
+    document.getElementById('intro-text').textContent = `A breakdown of the current 7th edition's official selection — ${allCocktails.filter(c=>c.stillActive).length} cocktails by base spirit and glassware.`;
+    renderDistribution();
+  } else if (view === 'board') {
+    document.getElementById('board-container').style.display = 'block';
+    document.getElementById('intro-text').textContent = 'The current 7th edition — 102 cocktails grouped by spirit.';
+    renderBoard();
+  }
+}
+
+// ── TIMELINE ──
+let currentFilter = 'active';
+let currentSearch = '';
+
+function getFiltered() {
+  const base = allCocktails.filter(c => {
+    const q = currentSearch.toLowerCase();
+    const matchSearch = !q || c.name.includes(q) || c.name.replace(/_/g,' ').includes(q);
+    // Edition constraint always applies independently
+    const matchEdition = filterEdition === 'active' ? c.stillActive : true;
+    const matchCat = currentFilter==='all' ? true
+      : currentFilter==='active' ? true  // edition already handled above
+      : currentFilter==='One-hit Wonder' ? c.oneHit
+      : currentFilter==='comeback' ? c.isComeback
+      : currentFilter==='rising' ? c.isRisingStar
+      : currentFilter==='fallen' ? c.isFallen
+      : c.segments.some(s=>s.cat===currentFilter);
+    // Spirit filter
+    const matchSpirit = filterSpirit==='all-spirit' ? true
+      : filterSpirit==='spirit-gin' ? c.spirit==='gin'
+      : filterSpirit==='spirit-rum' ? c.spirit==='rum'
+      : filterSpirit==='spirit-vodka' ? c.spirit==='vodka'
+      : filterSpirit==='spirit-whiskey' ? (c.spirit==='whiskey' || c.spirit==='whisky')
+      : filterSpirit==='spirit-brandy' ? (c.spirit==='brandy' || c.spirit==='calvados')
+      : filterSpirit==='spirit-tequila' ? (c.spirit==='tequila' || c.spirit==='mezcal')
+      : filterSpirit==='spirit-pisco' ? c.spirit==='pisco'
+      : filterSpirit==='spirit-sparkling' ? (c.spirit==='champagne' || c.spirit==='prosecco' || c.spirit==='wine')
+      : filterSpirit==='spirit-other' ? !['gin','rum','vodka','whiskey','whisky','brandy','calvados','tequila','mezcal','pisco','champagne','prosecco','wine'].includes(c.spirit||'')
+      : true;
+    return matchSearch && matchEdition && matchCat && matchSpirit;
+  });
+  if (sortAlpha) {
+    return [...base].sort((a,b) => a.name.localeCompare(b.name));
+  }
+  if (currentFilter==='active') {
+    return [...base].sort((a,b)=>
+      (CAT_RANK[a.currentCat]??3)-(CAT_RANK[b.currentCat]??3)||
+      b.editionCount-a.editionCount||a.name.localeCompare(b.name));
+  }
+  return [...base].sort((a,b)=>
+    a.firstYear-b.firstYear||
+    (CAT_RANK[a.currentCat]??3)-(CAT_RANK[b.currentCat]??3)||
+    b.editionCount-a.editionCount||a.name.localeCompare(b.name));
+}
+
+const ROW_H=22, LABEL_W=188, COUNTER_W=26, AXIS_H=48, MARGIN_BOTTOM=16, MARGIN_RIGHT=16, N_ED=7;
+
+function getInnerW() {
+  return Math.max(560, document.getElementById('chart-container').clientWidth - LABEL_W - COUNTER_W - MARGIN_RIGHT);
+}
+
+function renderChart() {
+  const filtered = getFiltered();
+  const innerW = getInnerW();
+  const colW = innerW/N_ED;
+  const offX = LABEL_W+COUNTER_W;
+  const totalW = innerW+offX+MARGIN_RIGHT;
+  const totalH = filtered.length*ROW_H+AXIS_H+MARGIN_BOTTOM;
+
+  const descriptions = {
+    'active':`The 7th edition's official selection — ${filtered.length} cocktails ranked by category then longevity.`,
+    'all':`The complete IBA chronicle — all ${filtered.length} cocktails ordered by first appearance, from 1961 to present.`,
+    'The Unforgettables':`The Unforgettables — ${filtered.length} cocktails of enduring, timeless character.`,
+    'Contemporary Classics':`Contemporary Classics — ${filtered.length} modern cocktails that have earned their place.`,
+    'New Era':`New Era — ${filtered.length} cocktails representing the current wave of bartending culture.`,
+    'One-hit Wonder':`One-hit Wonders — ${filtered.length} cocktails that appeared in a single edition and never returned.`,
+    'comeback':`Comeback Kids — ${filtered.length} cocktails that vanished for at least one full edition before making their return.`,
+    'rising':`Rising Stars — ${filtered.length} cocktails that climbed the category ladder across editions.`,
+    'fallen':`Fall from Grace — ${filtered.length} cocktails that held a named category but didn't survive to the current edition.`
+  };
+  document.getElementById('result-count').textContent = descriptions[currentFilter]||`Showing ${filtered.length} cocktails`;
+
+  const svg = document.getElementById('chart-svg');
+  svg.setAttribute('width',totalW); svg.setAttribute('height',totalH);
+  svg.setAttribute('viewBox',`0 0 ${totalW} ${totalH}`); svg.innerHTML='';
+  const ns='http://www.w3.org/2000/svg';
+  const tip = document.getElementById('tooltip');
+
+  function el(tag,attrs,parent) {
+    const e=document.createElementNS(ns,tag);
+    for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);
+    if(parent)parent.appendChild(e); return e;
+  }
+
+  const t1=el('text',{x:offX+2,y:AXIS_H-8,'text-anchor':'start',fill:'#b8b8b0','font-size':9.5,'font-family':'DM Sans, sans-serif','letter-spacing':'0.04em'},svg);
+  t1.textContent='1961';
+  const t2=el('text',{x:offX+innerW-2,y:AXIS_H-8,'text-anchor':'end',fill:'#b8b8b0','font-size':9.5,'font-family':'DM Sans, sans-serif','letter-spacing':'0.04em'},svg);
+  t2.textContent='Present';
+
+  EDITIONS.forEach((ed,i)=>{
+    const x0=offX+colW*i, xMid=x0+colW/2;
+    el('line',{x1:x0,x2:x0,y1:AXIS_H,y2:totalH-MARGIN_BOTTOM,stroke:'#e8e8e2','stroke-width':1},svg);
+    const lbl=el('text',{x:xMid,y:20,'text-anchor':'middle',fill:'#b0b0a8','font-size':10,'font-family':'DM Sans, sans-serif','font-weight':400,'letter-spacing':'0.08em',style:'text-transform:uppercase; user-select:none;'},svg);
+    lbl.textContent=ed.label;
+    const hz=el('rect',{x:x0,y:0,width:colW,height:AXIS_H,fill:'transparent',style:'cursor:default;'},svg);
+    const dateStr=ed.end?`${ed.start} – ${ed.end}`:`${ed.start} – Present`;
+    hz.addEventListener('mouseenter',()=>lbl.setAttribute('fill','#1a1a18'));
+    hz.addEventListener('mouseleave',()=>{ lbl.setAttribute('fill','#b0b0a8'); tip.style.display='none'; });
+    hz.addEventListener('mousemove',e=>{ tip.innerHTML=`<span style="font-weight:500;display:block;text-transform:capitalize">${ed.label}</span><span style="color:#888">${dateStr}</span>`; tip.style.display='block'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-40)+'px'; });
+  });
+  el('line',{x1:offX+innerW,x2:offX+innerW,y1:AXIS_H,y2:totalH-MARGIN_BOTTOM,stroke:'#e8e8e2','stroke-width':1},svg);
+
+  let lastTier=null;
+  filtered.forEach((c,i)=>{
+    const y=AXIS_H+i*ROW_H;
+    if(lastTier!==null&&c.editionCount!==lastTier)
+      el('line',{x1:0,x2:totalW,y1:y-2,y2:y-2,stroke:'#e8e8e2','stroke-width':0.5,'stroke-dasharray':'3,3'},svg);
+    lastTier=c.editionCount;
+
+    // Flag
+    if (c.flag) {
+      const flag=el('text',{x:4,y:y+ROW_H/2+1,'dominant-baseline':'middle','font-size':11,style:'user-select:none;'},svg);
+      flag.textContent=c.flag;
+    }
+
+    // Clickable label
+    const lblG=el('g',{style:'cursor:pointer;'},svg);
+    const lbl=el('text',{x:LABEL_W-8,y:y+ROW_H/2+1,'text-anchor':'end','dominant-baseline':'middle',fill:'#5a5a54','font-size':11.5,'font-family':'DM Sans, sans-serif','font-weight':300},svg);
+    lbl.textContent=fmt(c.name);
+    lblG.appendChild(lbl);
+    if (c.url) {
+      lblG.addEventListener('mouseenter',()=>lbl.setAttribute('fill','#1a1a18'));
+      lblG.addEventListener('mouseleave',()=>lbl.setAttribute('fill','#5a5a54'));
+      lblG.addEventListener('click',()=>window.open(c.url,'_blank'));
+    }
+
+    // Counter
+    const ctr=el('text',{x:LABEL_W+COUNTER_W-4,y:y+ROW_H/2+1,'text-anchor':'end','dominant-baseline':'middle',fill:'#d0d0c8','font-size':9.5,'font-family':'DM Sans, sans-serif','font-weight':400},svg);
+    ctr.textContent=c.editionCount;
+
+    // Bars
+    for(const seg of c.segments){
+      const indices=editionIndicesForSegment(seg);
+      if(!indices.length) continue;
+      const x0=offX+colW*indices[0], x1=offX+colW*(indices[indices.length-1]+1);
+      const barW=Math.max(x1-x0,2.5);
+      const color=COLORS[seg.cat]??COLORS[null];
+      const barY=y+(ROW_H-9)/2;
+      const rect=el('rect',{x:x0,y:barY,width:barW,height:9,rx:2,fill:color,style:'cursor:pointer; transition:opacity 0.12s;'},svg);
+      const catLabel=seg.cat??'pre-category era';
+      const endLabel=seg.yr === null?'present':seg.yr;
+      const segCount=indices.length, edWord=segCount===1?'edition':'editions';
+      rect.addEventListener('mouseenter',()=>rect.setAttribute('opacity','0.7'));
+      rect.addEventListener('mouseleave',()=>{ rect.setAttribute('opacity','1'); tip.style.display='none'; });
+      rect.addEventListener('mousemove',e=>{
+        const bannerColor = color;
+        const bannerHtml = `<div style="width:100%;height:8px;background:${bannerColor};border-radius:6px 6px 0 0;display:block;"></div>`;
+        tip.innerHTML=
+          bannerHtml+
+          `<div style="padding:8px 12px 10px">`+
+          `<span style="font-weight:500;display:block;margin-bottom:1px">${fmt(c.name)}</span>`+
+          `<span style="color:#888;display:block">${seg.ya} – ${endLabel}</span>`+
+          `<span style="color:${color};display:block;margin-top:4px">${segCount} ${edWord} in ${catLabel}</span>`+
+          `<span style="color:#bbb;display:block;font-size:11px">${c.editionCount} of 7 editions total</span>`+
+          `</div>`;
+        tip.style.display='block'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-55)+'px';
+      });
+      if(c.url) {
+        rect.style.cursor='pointer';
+        rect.addEventListener('click',()=>window.open(c.url,'_blank'));
+      }
+    }
+  });
+}
+
+// ── DISTRIBUTION ──
+const COCKTAILS_DIST = allCocktails.filter(c=>c.stillActive).map(c=>({
+  id: c.name,
+  family: c.family || 'Unknown',
+  spirit: c.spirit || 'Unknown',
+  glass: c.glass || 'Unknown'
+}));
+
+const FAMILY_COLORS_D = {
+  "Sour":"#D85A30","Aromatic":"#7F77DD","Martini":"#1D9E75","Highball":"#E8A020",
+  "Tiki":"#3AAFA9","Sparkling":"#A06090","Collins":"#4080C0","Old Fashioned":"#8B6914",
+  "Cream/Dessert":"#C05080","Fizz":"#5D9E5D","Punch":"#9E5D1D","Flip":"#606090","Other":"#A0A098"
+};
+const SPIRIT_COLORS_D = {
+  "gin":"#7F77DD","rum":"#D85A30","whiskey":"#8B6914","vodka":"#4080C0",
+  "brandy":"#C05080","tequila":"#E8A020","mezcal":"#3AAFA9","pisco":"#5D9E5D",
+  "cachaça":"#9E5D1D","champagne":"#A06090","prosecco":"#A06090","mixed":"#A0A098",
+  "whisky":"#7B5A1E","campari":"#D02020","fernet":"#505050","chartreuse":"#70A020",
+  "wine":"#904080","port":"#800020","sherry":"#A04000","galliano":"#D4A020",
+  "crème de menthe":"#20A060"
+};
+const GLASS_COLORS_D = {
+  "Coupe":"#7F77DD","Old-fashioned":"#D85A30","Collins":"#1D9E75","Martini":"#E8A020",
+  "Nick & Nora":"#3AAFA9","Flute":"#A06090","Tiki mug":"#C05080","Goblet":"#4080C0"
+};
+
+let currentDistTab = 'spirit';
+let distActiveKey = null;
+
+function getDistCounts(dim) {
+  const counts = {};
+  for (const c of COCKTAILS_DIST) {
+    const v = c[dim]||'Unknown';
+    if (!counts[v]) counts[v]={count:0,items:[]};
+    counts[v].count++; counts[v].items.push(c);
+  }
+  return Object.entries(counts).sort((a,b)=>b[1].count-a[1].count);
+}
+
+function getDistBreakdown(key, dim, breakDim) {
+  const subset = COCKTAILS_DIST.filter(c=>c[dim]===key);
+  const counts = {};
+  for (const c of subset) { const v=c[breakDim]||'Unknown'; counts[v]=(counts[v]||0)+1; }
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const total = subset.length;
+  const result = []; let otherCount = 0;
+  for (const [k,v] of sorted) {
+    if (v===1 && sorted.length>6) otherCount+=v;
+    else result.push([k,v]);
+  }
+  if (otherCount>0) result.push(['Other',otherCount]);
+  return {slices:result, total};
+}
+
+function drawDistPie(slices, colorMap) {
+  const svg = document.getElementById('pie-svg');
+  const ns = 'http://www.w3.org/2000/svg';
+  svg.innerHTML='';
+  const cx=80,cy=80,r=72,gap=0.02;
+  const total = slices.reduce((s,[,v])=>s+v,0);
+  let angle = -Math.PI/2;
+  const tip = document.getElementById('tooltip');
+  slices.forEach(([key,count])=>{
+    const sweep=(count/total)*(Math.PI*2)-gap;
+    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(angle+sweep),y2=cy+r*Math.sin(angle+sweep);
+    const large=sweep>Math.PI?1:0;
+    const path=document.createElementNS(ns,'path');
+    path.setAttribute('d',`M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z`);
+    path.setAttribute('fill',colorMap[key]||'#C8C8C0');
+    path.setAttribute('stroke','white'); path.setAttribute('stroke-width','1.5');
+    path.addEventListener('mousemove',e=>{
+      const pct=Math.round(count/total*100);
+      tip.innerHTML=`<span style="font-weight:500">${key}</span><br><span style="color:#888">${count} cocktail${count>1?'s':''} · ${pct}%</span>`;
+      tip.style.display='block'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-40)+'px';
+    });
+    path.addEventListener('mouseleave',()=>tip.style.display='none');
+    svg.appendChild(path); angle+=sweep+gap;
+  });
+}
+
+function openDistPie(key, dim) {
+  const breakDim = dim==='spirit'?'family':'spirit';
+  const breakColors = dim==='spirit'?FAMILY_COLORS_D:SPIRIT_COLORS_D;
+  const breakLabel = dim==='spirit'?'family':'base spirit';
+  const {slices,total} = getDistBreakdown(key,dim,breakDim);
+  document.getElementById('pie-title').textContent = key.charAt(0).toUpperCase()+key.slice(1);
+  document.getElementById('pie-subtitle').textContent = `${total} cocktail${total>1?'s':''} · breakdown by ${breakLabel}`;
+  drawDistPie(slices,breakColors);
+  const legend=document.getElementById('pie-legend');
+  legend.innerHTML='';
+  slices.forEach(([k,v])=>{
+    const pct=Math.round(v/total*100);
+    const item=document.createElement('div'); item.className='pie-legend-item';
+    item.innerHTML=`<div class="pie-legend-dot" style="background:${breakColors[k]||'#C8C8C0'}"></div><span>${k}</span><span class="pie-legend-pct">${pct}%</span>`;
+    legend.appendChild(item);
+  });
+  document.getElementById('pie-panel').classList.add('open');
+}
+
+function renderDistribution() {
+  renderDistHBar();
+  document.getElementById('pie-panel').classList.remove('open');
+  distActiveKey = null;
+}
+
+function renderDistHBar() {
+  const colorMap = currentDistTab==='spirit'?SPIRIT_COLORS_D:GLASS_COLORS_D;
+  const counts = getDistCounts(currentDistTab);
+  const total = COCKTAILS_DIST.length;
+  const max = counts[0][1].count;
+  const chart = document.getElementById('hbar-chart');
+  chart.innerHTML='';
+  counts.forEach(([key,{count}])=>{
+    const pct=Math.round(count/total*100);
+    const fillW=Math.round(count/max*100);
+    const color=colorMap[key]||'#C8C8C0';
+    const isActive=distActiveKey===key;
+    const isDimmed=distActiveKey&&!isActive;
+    const row=document.createElement('div');
+    row.className='hbar-row'+(isActive?' active':'');
+    row.innerHTML=`<div class="hbar-label">${key}</div><div class="hbar-track"><div class="hbar-fill" style="width:${fillW}%;background:${color};opacity:${isDimmed?0.3:1}"><span class="hbar-val">${count}</span></div></div><div class="hbar-pct">${pct}%</div>`;
+    row.addEventListener('click',()=>{
+      if(distActiveKey===key){ distActiveKey=null; document.getElementById('pie-panel').classList.remove('open'); }
+      else { distActiveKey=key; openDistPie(key,currentDistTab); }
+      renderDistHBar();
+    });
+    chart.appendChild(row);
+  });
+  document.getElementById('section-sub').textContent =
+    currentDistTab==='spirit'
+      ? 'Ranked by count — click a row to see family breakdown'
+      : 'Ranked by count — click a row to see base spirit breakdown';
+}
+
+document.getElementById('dist-tabs').addEventListener('click',e=>{
+  const tab=e.target.closest('.tab'); if(!tab) return;
+  currentDistTab=tab.dataset.tab;
+  distActiveKey=null;
+  document.getElementById('pie-panel').classList.remove('open');
+  document.querySelectorAll('#dist-tabs .tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  renderDistHBar();
+});
+
+// ── CONTROLS ──
+document.getElementById('search').addEventListener('input',e=>{ currentSearch=e.target.value; renderChart(); });
+// ── A-Z SORT TOGGLE ──
+document.getElementById('btn-az').addEventListener('click', () => {
+  sortAlpha = !sortAlpha;
+  const btn = document.getElementById('btn-az');
+  btn.classList.toggle('active', sortAlpha);
+  document.getElementById('lbl-az').textContent = sortAlpha ? 'A–Z ✓' : 'A–Z';
+  renderChart();
+});
+
+
+// ── BOARD VIEW ──
+const SPIRIT_GROUPS = [
+  { key: 'gin',       label: 'Gin',                   spirits: ['gin'] },
+  { key: 'rum',       label: 'Rum',                   spirits: ['rum'] },
+  { key: 'vodka',     label: 'Vodka',                 spirits: ['vodka'] },
+  { key: 'whiskey',   label: 'Whiskey',               spirits: ['whiskey','whisky'] },
+  { key: 'brandy',    label: 'Brandy',                spirits: ['brandy','calvados'] },
+  { key: 'tequila',   label: 'Tequila / Mezcal',      spirits: ['tequila','mezcal'] },
+  { key: 'pisco',     label: 'Pisco',                 spirits: ['pisco'] },
+  { key: 'sparkling', label: 'Champagne & Sparkling', spirits: ['champagne','prosecco','wine'] },
+  { key: 'other',     label: 'Other Spirits',         spirits: [] }
+];
+
+const CAT_COLORS_BOARD = {
+  'The Unforgettables': '#7F77DD',
+  'Contemporary Classics': '#1D9E75',
+  'New Era': '#D85A30'
+};
+
+const CAT_RANK_BOARD = { 'The Unforgettables':0, 'Contemporary Classics':1, 'New Era':2 };
+
+function renderBoard() {
+  const container = document.getElementById('board-inner');
+  container.innerHTML = '';
+
+  const active = allCocktails.filter(c => c.stillActive);
+  const knownSpirits = SPIRIT_GROUPS.flatMap(g => g.spirits);
+
+  SPIRIT_GROUPS.forEach(group => {
+    let cards;
+    if (group.key === 'other') {
+      cards = active.filter(c => !knownSpirits.includes(c.spirit||''));
+    } else {
+      cards = active.filter(c => group.spirits.includes(c.spirit||''));
+    }
+    if (!cards.length) return;
+
+    // Sort by category prestige then alpha
+    cards.sort((a,b) =>
+      (CAT_RANK_BOARD[a.currentCat]??3) - (CAT_RANK_BOARD[b.currentCat]??3) ||
+      a.name.localeCompare(b.name)
+    );
+
+    const section = document.createElement('div');
+    section.className = 'board-group';
+
+    const header = document.createElement('div');
+    header.className = 'board-group-header';
+    header.innerHTML = `<span class="board-group-title">${group.label}</span><span class="board-group-count">${cards.length} cocktail${cards.length>1?'s':''}</span>`;
+    section.appendChild(header);
+
+    const cardRow = document.createElement('div');
+    cardRow.className = 'board-cards';
+
+    cards.forEach(c => {
+      const catColor = CAT_COLORS_BOARD[c.currentCat] || '#C8C8C0';
+      const catName = c.currentCat || '';
+      const flag = c.flag || '';
+
+      const card = document.createElement('a');
+      card.className = 'board-card';
+      if (c.url) { card.href = c.url; card.target = '_blank'; }
+
+      const monogram = fmt(c.name).charAt(0);
+      card.innerHTML = `
+        <div class="board-card-thumb" style="background:${catColor}18">
+          <span class="board-card-monogram" style="color:${catColor}">${monogram}</span>
+        </div>
+        <div style="height:3px;background:${catColor}"></div>
+        <div class="board-card-body">
+          <div class="board-card-name">${fmt(c.name)}</div>
+        </div>`;
+
+      cardRow.appendChild(card);
+    });
+
+    section.appendChild(cardRow);
+    container.appendChild(section);
+  });
+}
+
+// ── DROPDOWN CONTROLS ──
+const DROPDOWNS = ['edition','category','story','spirit'];
+
+// Close all menus
+function closeAllMenus() {
+  DROPDOWNS.forEach(id => {
+    document.getElementById('menu-'+id).classList.remove('open');
+    document.getElementById('btn-'+id).classList.remove('open');
+  });
+}
+
+// Toggle a specific menu
+DROPDOWNS.forEach(id => {
+  document.getElementById('btn-'+id).addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = document.getElementById('menu-'+id).classList.contains('open');
+    closeAllMenus();
+    if (!isOpen) {
+      document.getElementById('menu-'+id).classList.add('open');
+      document.getElementById('btn-'+id).classList.add('open');
+    }
+  });
+});
+
+document.addEventListener('click', closeAllMenus);
+
+// Track state across all 4 dropdowns
+let filterEdition = 'active';
+let sortAlpha = false;
+let filterCategory = 'all-cat';
+let filterStory = 'all-story';
+let filterSpirit = 'all-spirit';
+
+// Main category labels for display
+const EDITION_LABELS = { 'active':'Current Edition', 'all':'All Editions' };
+const CAT_LABELS = { 'all-cat':'All Categories', 'The Unforgettables':'The Unforgettables', 'Contemporary Classics':'Contemporary Classics', 'New Era':'New Era' };
+const STORY_LABELS = { 'all-story':'Filter by Story', 'One-hit Wonder':'One-hit Wonders', 'comeback':'Comeback Kids', 'rising':'Rising Stars', 'fallen':'Fall from Grace' };
+const SPIRIT_LABELS = { 'all-spirit':'By Spirit', 'spirit-gin':'Gin', 'spirit-rum':'Rum', 'spirit-vodka':'Vodka', 'spirit-whiskey':'Whiskey', 'spirit-brandy':'Brandy', 'spirit-tequila':'Tequila / Mezcal', 'spirit-pisco':'Pisco', 'spirit-sparkling':'Champagne & Sparkling', 'spirit-other':'Other Spirits' };
+
+function setDropdownActive(menuId, filter) {
+  document.querySelectorAll(`#${menuId} .ctrl-item`).forEach(i => {
+    i.classList.toggle('active', i.dataset.filter === filter);
+  });
+}
+
+function applyAllFilters() {
+  if (filterStory !== 'all-story') currentFilter = filterStory;
+  else if (filterCategory !== 'all-cat') currentFilter = filterCategory;
+  else if (filterEdition === 'active') currentFilter = 'active';
+  else currentFilter = 'all';
+  renderChart();
+}
+
+// Edition menu
+document.getElementById('menu-edition').addEventListener('click', e => {
+  const item = e.target.closest('.ctrl-item'); if (!item) return;
+  filterEdition = item.dataset.filter;
+  filterCategory = 'all-cat'; filterStory = 'all-story';
+  document.getElementById('lbl-edition').textContent = EDITION_LABELS[filterEdition];
+  document.getElementById('btn-edition').classList.toggle('active', true);
+  document.getElementById('btn-category').classList.remove('active');
+  document.getElementById('btn-story').classList.remove('active');
+  setDropdownActive('menu-edition', filterEdition);
+  setDropdownActive('menu-category', filterCategory);
+  setDropdownActive('menu-story', filterStory);
+  document.getElementById('lbl-category').textContent = 'All Categories';
+  document.getElementById('lbl-story').textContent = 'Filter by Story';
+  closeAllMenus(); applyAllFilters();
+});
+
+// Category menu
+document.getElementById('menu-category').addEventListener('click', e => {
+  const item = e.target.closest('.ctrl-item'); if (!item) return;
+  filterCategory = item.dataset.filter;
+  filterStory = 'all-story'; filterEdition = 'active';
+  document.getElementById('lbl-category').textContent = CAT_LABELS[filterCategory];
+  document.getElementById('btn-category').classList.toggle('active', filterCategory !== 'all-cat');
+  document.getElementById('btn-edition').classList.toggle('active', filterCategory === 'all-cat');
+  document.getElementById('btn-story').classList.remove('active');
+  setDropdownActive('menu-category', filterCategory);
+  setDropdownActive('menu-story', filterStory);
+  document.getElementById('lbl-story').textContent = 'Filter by Story';
+  closeAllMenus(); applyAllFilters();
+});
+
+// Story menu
+document.getElementById('menu-story').addEventListener('click', e => {
+  const item = e.target.closest('.ctrl-item'); if (!item) return;
+  filterStory = item.dataset.filter;
+  document.getElementById('lbl-story').textContent = STORY_LABELS[filterStory];
+  document.getElementById('btn-story').classList.toggle('active', filterStory !== 'all-story');
+  setDropdownActive('menu-story', filterStory);
+  closeAllMenus(); applyAllFilters();
+});
+
+// Spirit menu
+document.getElementById('menu-spirit').addEventListener('click', e => {
+  const item = e.target.closest('.ctrl-item'); if (!item) return;
+  filterSpirit = item.dataset.filter;
+  document.getElementById('lbl-spirit').textContent = SPIRIT_LABELS[filterSpirit];
+  document.getElementById('btn-spirit').classList.toggle('active', filterSpirit !== 'all-spirit');
+  setDropdownActive('menu-spirit', filterSpirit);
+  closeAllMenus(); applyAllFilters();
+});
+window.addEventListener('resize',()=>{ if(currentView==='timeline') renderChart(); });
+renderChart();
+</script>
+</body>
+</html>
